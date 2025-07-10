@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocky | NoxSec Terminal</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            font-size: 14px;
+            line-height: 1.2;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            to {
+                top: 100%;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ascii-header {
+            text-align: center;
+            margin: 40px 0;
+            font-size: 12px;
+            line-height: 1.1;
+            color: #ff6b35;
+            text-shadow: 0 0 10px #ff6b35;
+        }
+
+        .terminal {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            position: relative;
+        }
+
+        .terminal::before {
+            content: "● ● ●";
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            color: #ff6b35;
+            font-size: 20px;
+        }
+
+        .terminal-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        .typing-text {
+            border-right: 3px solid #00ff41;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff41; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .menu {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .menu li {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid #00ff41;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu li:hover {
+            background: rgba(0, 255, 65, 0.2);
+            transform: translateX(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .menu a {
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+        }
+
+        .menu a:before {
+            content: "$ ";
+            color: #ff6b35;
+        }
+
+        .skills-container {
+            margin: 30px 0;
+        }
+
+        .skill {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        .skill-name {
+            color: #ff6b35;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .skill-bar {
+            background: #333;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #ff6b35);
+            border-radius: 10px;
+            transition: width 2s ease-in-out;
+            position: relative;
+        }
+
+        .skill-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: skill-shine 2s infinite;
+        }
+
+        @keyframes skill-shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .skill-percentage {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .project-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .project-title {
+            color: #ff6b35;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .project-description {
+            color: #00ff41;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .project-link {
+            color: #00ff41;
+            text-decoration: none;
+            border: 1px solid #00ff41;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .project-link:hover {
+            background: #00ff41;
+            color: #000;
+        }
+
+        .contact-links {
+            margin: 30px 0;
+        }
+
+        .contact-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .contact-item a {
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .contact-item a:hover {
+            color: #ff6b35;
+        }
+
+        .nav {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .nav a {
+            color: #00ff41;
+            text-decoration: none;
+            margin: 0 20px;
+            padding: 10px 20px;
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .nav a:hover {
+            background: #00ff41;
+            color: #000;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid #00ff41;
+            color: #888;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .terminal {
+                padding: 20px;
+            }
+            
+            .ascii-header {
+                font-size: 8px;
+            }
+            
+            .menu a {
+                font-size: 16px;
+            }
+            
+            .nav a {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+
+        .glitch {
+            position: relative;
+            color: #00ff41;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            animation: glitch-animation 2s infinite;
+        }
+
+        @keyframes glitch-animation {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, 2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-2px, -2px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrix-bg"></div>
+
+    <div class="container">
+        <div class="page active" id="home">
+            <div class="ascii-header">
+                <pre>
+    ██████╗  ██████╗  ██████╗██╗  ██╗██╗   ██╗
+    ██╔══██╗██╔═══██╗██╔════╝██║ ██╔╝╚██╗ ██╔╝
+    ██████╔╝██║   ██║██║     █████╔╝  ╚████╔╝ 
+    ██╔══██╗██║   ██║██║     ██╔═██╗   ╚██╔╝  
+    ██║  ██║╚██████╔╝╚██████╗██║  ██╗   ██║   
+    ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝   ╚═╝   
+                                               
+                    Cybersecurity Expert & Hacker
+                </pre>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="https://discord.gg/9pBsUU7JJv" target="_blank" style="color: #ff6b35; text-decoration: none; font-size: 24px; text-shadow: 0 0 15px #ff6b35; transition: all 0.3s ease;">
+                    <div class="glitch" style="font-size: 20px;">Join NoxSec Community 🔥</div>
+                </a>
+            </div>
+
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="glitch">INITIALIZING SECURE CONNECTION...</div>
+                </div>
+                
+                <div id="welcome-text" class="typing-text" style="font-size: 18px; margin-bottom: 30px;">
+                </div>
+
+                <ul class="menu">
+                    <li><a href="#" onclick="showPage('about')">about_me</a></li>
+                    <li><a href="#" onclick="showPage('projects')">projects</a></li>
+                    <li><a href="#" onclick="showPage('skills')">skills</a></li>
+                    <li><a href="#" onclick="showPage('contact')">contact</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page" id="about">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <h2 class="glitch">ABOUT_ME.TXT</h2>
+                </div>
+                
+                <div style="margin: 30px 0; line-height: 1.6;">
+                    <p style="color: #ff6b35; font-size: 18px; margin-bottom: 20px;">#!/bin/bash</p>
+                    <p style="margin-bottom: 15px;"># Ayyan Asif - Cybersecurity Student & Programmer</p>
+                    <p style="margin-bottom: 15px;">Hey there! I'm Ayyan Asif, but you can call me Rocky in the cyber world. I'm a passionate cybersecurity enthusiast, skilled programmer, and the proud founder of NoxSec - a thriving Discord community where ethical hackers and security researchers come together.</p>
+                    <p style="margin-bottom: 15px;">My expertise spans across penetration testing, vulnerability research, and developing secure applications. I live and breathe Linux systems, specialize in web application security, and love creating custom tools that make other security professionals' lives easier.</p>
+                    <p style="margin-bottom: 15px;">When I'm not deep in code or hunting down vulnerabilities, you'll find me building NoxSec into the premier destination for cybersecurity education and collaboration. Our community is all about sharing knowledge, solving challenges, and pushing the boundaries of what's possible in cybersecurity.</p>
+                    <p style="color: #ff6b35;">// "Security is not a product, but a process" - Always learning, always evolving 🔒</p>
+                </div>
+
+                <div class="nav">
+                    <a href="#" onclick="showPage('home')">home</a>
+                    <a href="#" onclick="showPage('projects')">projects</a>
+                    <a href="#" onclick="showPage('skills')">skills</a>
+                    <a href="#" onclick="showPage('contact')">contact</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="skills">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <h2 class="glitch">SKILLS.SH</h2>
+                </div>
+                
+                <div class="skills-container">
+                    <div class="skill">
+                        <div class="skill-name">🐍 Python | Penetration Testing & Automation</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="65">
+                                <div class="skill-percentage">65%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Advanced scripting, exploit development, automation frameworks</div>
+                    </div>
+
+                    <!-- <div class="skill">
+                        <div class="skill-name">⚡ C/C++ | System Programming & Binary Exploitation</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="78">
+                                <div class="skill-percentage">78%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Low-level programming, buffer overflows, reverse engineering</div>
+                    </div> -->
+
+                    <div class="skill">
+                        <div class="skill-name">🐧 Bash/Shell | Linux Administration & Automation</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="80">
+                                <div class="skill-percentage">80%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ System administration, automation scripts, process management</div>
+                    </div>
+
+                    <div class="skill">
+                        <div class="skill-name">🌐 Web Application Security | OWASP & Advanced Attacks</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="75">
+                                <div class="skill-percentage">75%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ SQL injection, XSS, CSRF, authentication bypass, API security</div>
+                    </div>
+
+                    <div class="skill">
+                        <div class="skill-name">🔍 Network Security | Packet Analysis & Forensics</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="78">
+                                <div class="skill-percentage">78%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Wireshark, tcpdump, network reconnaissance, traffic analysis</div>
+                    </div>
+
+                    <div class="skill">
+                        <div class="skill-name">🤖 Discord Bot Development | Python </div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="94">
+                                <div class="skill-percentage">94%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Discord.py, moderation bots, custom commands, database integration</div>
+                    </div>
+
+                    <!-- <div class="skill">
+                        <div class="skill-name">🔐 Cryptography & Digital Forensics</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="75">
+                                <div class="skill-percentage">75%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Hash cracking, encryption analysis, digital evidence recovery</div>
+                    </div> -->
+
+                    <div class="skill">
+                        <div class="skill-name">🛡️ Penetration Testing | Red Team Operations</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="80">
+                                <div class="skill-percentage">80%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ Metasploit, Burp Suite, Nmap, social engineering, post-exploitation</div>
+                    </div>
+
+                    <!-- <div class="skill">
+                        <div class="skill-name">☁️ Cloud Security | AWS/Azure Security Assessment</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" data-skill="70">
+                                <div class="skill-percentage">70%</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">▸ IAM policies, S3 bucket security, container security, compliance</div>
+                    </div> -->
+                </div>
+
+                <div class="nav">
+                    <a href="#" onclick="showPage('home')">home</a>
+                    <a href="#" onclick="showPage('about')">about</a>
+                    <a href="#" onclick="showPage('projects')">projects</a>
+                    <a href="#" onclick="showPage('contact')">contact</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="projects">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <h2 class="glitch">PROJECTS.LOG</h2>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-title">NoxSec Discord Community</div>
+                    <div class="project-description"># Premier cybersecurity Discord server with 1000+ members, featuring CTF challenges, security discussions, and educational resources</div>
+                    <a href="https://discord.gg/9pBsUU7JJv" target="_blank" class="project-link">Join NoxSec Discord</a>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-title">Python Scripting Services</div>
+                    <div class="project-description"># Custom Python script development on Fiverr</div>
+                    <a href="https://www.fiverr.com/rockyempirelegi/debug-fix-errors-and-write-python-scripts-for-you" target="_blank" class="project-link">Order Python Scripts</a>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-title">Discord Bot Development Service</div>
+                    <div class="project-description"># Professional Discord bot development on Fiverr - custom bots for moderation, gaming, and utility purposes</div>
+                    <a href="https://www.fiverr.com/rockyempirelegi/build-a-powerful-discord-bot-with-custom-features-in-python" target="_blank" class="project-link">Order Discord Bot</a>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-title">Custom Tools and Scripts</div>
+                    <div class="project-description"># Collection of Tools and Scripts.</div>
+                    <a href="#" class="project-link">github.com/RockyDevil7</a>
+                </div>
+
+                <div class="nav">
+                    <a href="#" onclick="showPage('home')">home</a>
+                    <a href="#" onclick="showPage('about')">about</a>
+                    <a href="#" onclick="showPage('skills')">skills</a>
+                    <a href="#" onclick="showPage('contact')">contact</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="contact">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <h2 class="glitch">CONTACT.SH</h2>
+                </div>
+                
+                <div style="margin: 30px 0;">
+                    <p style="color: #ff6b35; margin-bottom: 20px;">echo "Establishing secure communication channels..."</p>
+                </div>
+
+                <div class="contact-links">
+                    <div class="contact-item">
+                        <strong>GitHub:</strong> <a href="https://github.com/RockyDevil7" target="_blank">github.com/RockyDevil7/</a>
+                        <span style="color: #888;"> # Code repositories & open source projects</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>NoxSec Discord:</strong> <a href="https://discord.gg/9pBsUU7JJv" target="_blank">discord.gg/9pBsUU7JJv</a>
+                        <span style="color: #888;"> # Join our cybersecurity community</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>Discord Username:</strong> <a href="#" style="color: #ff6b35;">rockydevil7</a>
+                        <span style="color: #888;"> # Direct message for collaboration</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>Python Scripts Fiverr:</strong> <a href="https://www.fiverr.com/rockyempirelegi/debug-fix-errors-and-write-python-scripts-for-you" target="_blank">Custom Python Development</a>
+                        <span style="color: #888;"> # Professional Python scripting services</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>Discord Bot Fiverr:</strong> <a href="https://www.fiverr.com/rockyempirelegi/build-a-powerful-discord-bot-with-custom-features-in-python" target="_blank">Professional Bot Development</a>
+                        <span style="color: #888;"> # Custom Discord bot creation</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>Hackerone:</strong> <a href="https://hackerone.com/rockydevil7" target="_blank">hackerone.com/rockydevil7</a>
+                        <span style="color: #888;"> # Professional networking</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <strong>Email:</strong> <a href="mailto:rockymalik984@gmail.com">rockymalik984@gmail.com</a>
+                        <span style="color: #888;"> # Secure communication</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0;">
+                    <div class="ascii-header" style="font-size: 10px;">
+                        <pre>
+    ╔═══════════════════════════════════════╗
+    ║          CONNECTION TERMINATED        ║
+    ║         THANK YOU FOR VISITING        ║
+    ║            STAY SECURE 🔒             ║
+    ╚═══════════════════════════════════════╝
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="nav">
+                    <a href="#" onclick="showPage('home')">home</a>
+                    <a href="#" onclick="showPage('about')">about</a>
+                    <a href="#" onclick="showPage('skills')">skills</a>
+                    <a href="#" onclick="showPage('projects')">projects</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Rocky | NoxSec. All rights reserved. | Hack the planet, protect the future.</p>
+        </div>
+    </div>
+
+    <script>
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrix-bg');
+            const characters = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            
+            for (let i = 0; i < 50; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                }
+                column.innerHTML = text;
+                
+                matrixBg.appendChild(column);
+            }
+        }
+
+        function typeText(element, text, speed = 50) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'skills') {
+                setTimeout(() => {
+                    animateSkillBars();
+                }, 100);
+            }
+        }
+
+        function animateSkillBars() {
+            const skillBars = document.querySelectorAll('.skill-progress');
+            skillBars.forEach(bar => {
+                const skillLevel = bar.getAttribute('data-skill');
+                bar.style.width = skillLevel + '%';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createMatrixRain();
+            
+            const welcomeText = "Welcome to Rocky's Cyber Terminal...\n\n> System: NoxSec Security Framework v2.5\n> Status: All systems operational\n> Access Level: Authenticated\n\nSelect a command to continue:";
+            typeText(document.getElementById('welcome-text'), welcomeText, 30);
+            
+            setTimeout(() => {
+                const skillBars = document.querySelectorAll('.skill-progress');
+                skillBars.forEach(bar => {
+                    bar.style.width = '0%';
+                });
+            }, 100);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                // Easter egg: Ctrl+Enter for terminal access
+                console.log(`
+    ╔═══════════════════════════════════════╗
+    ║            TERMINAL ACCESS            ║
+    ║         You found the easter egg!     ║
+    ║            Welcome, hacker!           ║
+    ╚═══════════════════════════════════════╝
+                `);
+            }
+        });
+    </script>
+</body>
+</html>
